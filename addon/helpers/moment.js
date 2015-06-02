@@ -4,7 +4,7 @@ import momentjs from 'moment';
 var moment;
 
 if (Ember.HTMLBars) {
-  moment = function moment(params) {
+  moment = function moment(params, hash) {
     var length = params.length;
     var args = [];
     var output;
@@ -24,7 +24,13 @@ if (Ember.HTMLBars) {
       output = params[1];
     }
 
-    return momentjs.apply(this, args).format(output);
+    var date = momentjs.apply(this, args);
+
+    if(hash['utc']) {
+      date = date.utc();
+    }
+
+    return date.format(output);
   };
 } else {
   moment = function moment(value, maybeOutput, maybeInput) {
