@@ -1,25 +1,24 @@
 'use strict';
 
 var path = require('path');
+var stew = require('broccoli-stew');
+var VersionChecker = require('ember-cli-version-checker');
 
 module.exports = {
   name: 'ember-moment',
 
-  blueprintsPath: function blueprintsPath() {
-    return path.join(__dirname, 'blueprints');
+  included: function() {
+    this._super.included.apply(this, arguments);
   },
 
-  included: function included(app) {
-    this.app = app;
+  treeForApp: function(tree) {
+    var checker = new VersionChecker(this);
+    var dep = checker.for('ember', 'bower');
 
-    this._super.included(app);
+    if (dep.satisfies('>= 1.13.0') || dep.satisfies('>= 2.0.0-beta')) {
+      tree = stew.rm(tree, 'initializers/legacy-register.js');
+    }
 
-    app.import(app.bowerDirectory + '/moment/moment.js');
-
-    app.import(app.bowerDirectory + '/ember-cli-moment-shim/moment-shim.js', {
-      exports: {
-        moment: ['default']
-      }
-    });
+    return tree;
   }
 };
