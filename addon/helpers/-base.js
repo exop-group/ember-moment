@@ -21,7 +21,7 @@ export default Helper.extend({
     }
   },
 
-  morphMoment(time, { locale, timeZone }) {
+  morphMoment(time, { locale, timeZone, utc }) {
     locale = locale || this.get('moment.locale');
 
     if (locale) {
@@ -32,6 +32,10 @@ export default Helper.extend({
 
     if (timeZone && time.tz) {
       time = time.tz(timeZone);
+    }
+
+    if (utc) {
+      time = time.utc();
     }
 
     return time;

@@ -13,13 +13,13 @@ export default BaseHelper.extend({
     this.recompute();
   }),
 
-  compute: computeFn(function(params, { locale, timeZone }) {
+  compute: computeFn(function(params, { locale, timeZone, utc }) {
     this._super(...arguments);
 
     const { length } = params;
 
-    if (length > 3) {
-      throw new TypeError('ember-moment: Invalid Number of arguments, expected at most 4');
+    if (length > 4) {
+      throw new TypeError('ember-moment: Invalid Number of arguments, expected at most 5');
     }
 
     const args = [];
@@ -37,10 +37,6 @@ export default BaseHelper.extend({
       formatArgs.push(params[1]);
     }
 
-    return this.morphMoment(moment(...args), { locale, timeZone }).format(...formatArgs);
+    return this.morphMoment(moment(...args), { locale, timeZone, utc }).format(...formatArgs);
   })
-    if (hash.utc) {
-      time = time.utc();
-    }
-
 });
