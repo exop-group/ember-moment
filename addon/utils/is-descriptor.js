@@ -1,15 +1,11 @@
+// source: ember-cpm
+// https://github.com/cibernox/ember-cpm/blob/7b974567c92e45a815ee18c6cb62e3ba1fa99f1d/addon/utils.js#L17-L20
+
 import Ember from 'ember';
-let { typeOf, Descriptor } = Ember;
 
-// credit: https://github.com/cibernox/ember-cpm/blob/master/addon/utils.js#L17-L20
-function isDescriptor(propertyName) {
-  const meta = Ember.meta(this);
+const { typeOf, Descriptor } = Ember;
 
-  if (meta && meta.descs && meta.descs[propertyName]) {
-    return true;
-  }
-
-  const prop = this[propertyName];
+function isDescriptor(prop) {
   return typeOf(prop) === 'object' && (prop.constructor === Descriptor || // Ember < 1.11
      prop.isDescriptor); // Ember >= 1.11.0
 }

@@ -1,84 +1,86 @@
 import Ember from 'ember';
-import hbs from 'htmlbars-inline-precompile';
-import momentToNow from 'ember-moment/helpers/moment-to-now';
 import moment from 'moment';
-import { moduleFor, test } from 'ember-qunit';
-import callHelper from '../../helpers/call-helper';
-import { runAppend, runDestroy } from '../../helpers/run-append';
+import hbs from 'htmlbars-inline-precompile';
+import { moduleForComponent, test } from 'ember-qunit';
 
-const FAKE_HANDLEBARS_CONTEXT = {};
-
-moduleFor('helper:moment-to-now', {
-  setup() {
+moduleForComponent('moment-to-now',{
+  integration: true,
+  beforeEach() {
     moment.locale('en');
-    const registry =  this.registry || this.container;
-    registry.register('view:basic', Ember.View);
   }
 });
 
-test('one arg (date)', (assert) => {
+test('one arg (date)', function(assert) {
   assert.expect(1);
   const addThreeDays = new Date();
   addThreeDays.setDate(addThreeDays.getDate() - 3);
-  assert.equal(callHelper(momentToNow, [addThreeDays, FAKE_HANDLEBARS_CONTEXT]), 'in 3 days');
+
+  this.set('date', addThreeDays);
+
+  this.render(hbs`{{moment-to-now date}}`);
+  assert.equal(this.$().text(), 'in 3 days');
 });
 
-test('two args (date, inputFormat)', (assert) => {
+test('two args (date, inputFormat)', function(assert) {
   assert.expect(1);
   const addThreeDays = new Date();
   addThreeDays.setDate(addThreeDays.getDate() - 3);
-  assert.equal(callHelper(momentToNow, [addThreeDays, 'LLLL', FAKE_HANDLEBARS_CONTEXT]), 'in 3 days');
+
+  this.setProperties({
+    format: 'LLLL',
+    date: addThreeDays
+  });
+
+  this.render(hbs`{{moment-to-now date format}}`);
+  assert.equal(this.$().text(), 'in 3 days');
 });
 
 test('change date input and change is reflected by bound helper', function(assert) {
   assert.expect(2);
 
   const context = Ember.Object.create({
-    date: new Date(new Date().valueOf() - (60*60*1000))
+    date: moment().subtract(1, 'hour'),
   });
 
-  const view = this.container.lookupFactory('view:basic').create({
-    template: hbs`{{moment-to-now date}}`,
-    context: context
-  });
-
-  runAppend(view);
-
-  assert.equal(view.$().text(), 'in an hour');
+  this.set('context', context);
+  this.render(hbs`{{moment-to-now context.date}}`);
+  assert.equal(this.$().text(), 'in an hour');
 
   Ember.run(function () {
-    context.set('date', new Date(new Date().valueOf() - (60*60*2000)));
+    context.set('date', moment().subtract(2, 'hour'));
   });
 
-  assert.equal(view.$().text(), 'in 2 hours');
-
-  runDestroy(view);
+  assert.equal(this.$().text(), 'in 2 hours');
 });
 
 test('can inline a locale instead of using global locale', function(assert) {
   assert.expect(1);
-  const view = this.container.lookupFactory('view:basic').create({
-    template: hbs`{{moment-to-now date locale='es'}}`,
-    context: {
-      date: new Date(new Date().valueOf() - (60*60*1000))
-    }
-  });
 
-  runAppend(view);
-  assert.equal(view.$().text(), 'en una hora');
-  runDestroy(view);
+  this.set('date', moment().subtract(1, 'hour'));
+  this.render(hbs`{{moment-to-now date locale='es'}}`);
+  assert.equal(this.$().text(), 'en una hora');
 });
 
 test('can be called with null', function(assert) {
   assert.expect(1);
-  const view = this.container.lookupFactory('view:basic').create({
-    template: hbs`{{moment-to-now date allow-empty=true}}`,
-    context: {
-      date: null
-    }
-  });
 
-  runAppend(view);
-  assert.equal(view.$().text(), '');
-  runDestroy(view);
+  this.set('date', null);
+  this.render(hbs`{{moment-to-now date allow-empty=true}}`);
+  assert.equal(this.$().text(), '');
+});
+
+test('can be called with null using global config option', function(assert) {
+  assert.expect(1);
+
+  this.set('date', null);
+  this.render(hbs`{{moment-to-now date}}`);
+  assert.equal(this.$().text(), '');
+});
+
+test('unable to called with null overriding global config option', function(assert) {
+  assert.expect(1);
+
+  this.set('date', null);
+  this.render(hbs`{{moment-to-now date allow-empty=false}}`);
+  assert.equal(this.$().text(), 'Invalid date');
 });

@@ -1,47 +1,24 @@
 import Ember from 'ember';
 import moment from 'moment';
-import emberComputed from 'ember-new-computed';
-import isDescriptor from '../utils/is-descriptor';
+import getOwner from 'ember-getowner-polyfill';
 
-const { get, assert } = Ember;
-const a_slice = Array.prototype.slice;
+import computedFactory from './-base';
 
-function computedFormat(date, maybeOutputFormat, maybeInputFormat) {
-  assert('At least one datetime argument required for moment computed', arguments.length);
+const CONFIG_KEY = 'config:environment';
+const { get } = Ember;
 
-  const args = a_slice.call(arguments);
-  let result;
-  args.shift();
+export default computedFactory(function formatComtputed([value, optionalFormat]) {
+  if (!optionalFormat) {
+    const owner = getOwner(this);
 
-  return result = emberComputed(date, {
-    get() {
-      const momentArgs = [get(this, date)];
+    if (owner && owner.hasRegistration && owner.hasRegistration(CONFIG_KEY)) {
+      const config = owner.resolveRegistration(CONFIG_KEY);
 
-      const propertyValues = args.map((arg) => {
-        const desc = isDescriptor.call(this, arg);
-        if (desc && result._dependentKeys.indexOf(arg) === -1) {
-          result.property(arg);
-        }
-
-        return desc ? get(this, arg) : arg;
-      });
-
-      if (propertyValues.length) {
-        maybeOutputFormat = propertyValues[0];
-
-        if (propertyValues.length > 1) {
-          maybeInputFormat = propertyValues[1];
-          momentArgs.push(maybeInputFormat);
-        }
+      if (config) {
+        optionalFormat = get(config, 'moment.outputFormat');
       }
-      else if (this.container) {
-        const config = this.container.lookupFactory('config:environment');
-        maybeOutputFormat = get(config, 'moment.ouputFormat');
-      }
-
-      return moment.apply(this, momentArgs).format(maybeOutputFormat);
     }
-  });
-}
+  }
 
-export default computedFormat;
+  return moment(value).format(optionalFormat);
+});

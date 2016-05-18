@@ -1,3 +1,82 @@
+### 7.0.0-beta.1
+
+* Upgrade ember-cli-moment-shim to 1.2.0
+* Add moment query helpers (is-between, is-sae-or-after, is-same-or-before, is-same, is-after, is-before)
+* BREAKING: no longer defaults moment-format to LLLL and instead uses the moment default format (ISO 8601)
+  * Applications will need to specify the default format to LLLL if they want to keep this behavior: https://github.com/stefanpenner/ember-moment#global-default-output-format
+
+### 6.0.0
+
+* [BREAKING] computed property macros can now support composition (https://github.com/stefanpenner/ember-moment/pull/139)
+
+### 5.1.0
+
+* Helper support for `moment().calendar();` (https://github.com/stefanpenner/ember-moment/pull/143)
+
+### 5.0.2
+
+* Prevent moment 2.11.0 from being installed due to it being unsupported
+
+### 5.0.1
+
+* Reduce size and complexity of computeds
+
+### 5.0.0
+
+* Rewrote computeds to support literals as arguments
+* Do not warn on missing date when allowEmpty
+
+### 4.2.1
+
+* Remove `ember-new-computed`
+* Remove use of an Ember global
+* Remove need for instance initializer
+
+### 4.2.0
+
+* Upgrade `ember-cli-moment-shim`
+* Add a `defaultFormat` property to the service, which `moment-format` helpers observer to recompute
+* BUGFIX: `outputFormat` typo on `config/environment.js` lookup led to it never being properly looked up
+
+### 4.1.0
+
+* Adds support a `timeZone` argument on all helpers
+* Adds a service which contains two methods: `changeLocale` and `changeTimeZone`
+  * Invoking either of these methods will cause all helpers to rerender if a locale/timezone was not specified
+
+### 4.0.1
+
+* Removes two unused npm deps
+
+### 4.0.0
+
+* Removes support for legacy helpers
+* Drops support for Ember < 1.13.0 (continue to use 3.x for < 1.13.0 support)
+
+### 3.6.3-3.6.4
+
+* Ember version detection incorrectly reported
+
+### 3.6.2
+
+* Warn on locale mismatch, silently ignore `en` locale since included by default in moment
+
+### 3.6.1
+
+* Bugfix global output format
+
+### 3.6.0
+
+* 2.0-beta + 2.0-canary supported again
+* test support for deprecated helpers
+* global allowEmpty configuration option
+* removes unused helper modules from builds (slimmer dists)
+
+### 3.5.1
+
+* destroy interval timers on Helper destroy
+* work around issue with Ember.run.next blocking test helpers
+
 ### 3.5.0
 
 * Support for 2.0.0-beta and canary

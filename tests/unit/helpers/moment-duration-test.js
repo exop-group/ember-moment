@@ -1,31 +1,34 @@
-import Ember from 'ember';
-import { moduleFor, test } from 'ember-qunit';
 import moment from 'moment';
-import durationHelper from 'ember-moment/helpers/moment-duration';
-import callHelper from '../../helpers/call-helper';
 import hbs from 'htmlbars-inline-precompile';
-import { runAppend, runDestroy } from '../../helpers/run-append';
+import { moduleForComponent, test } from 'ember-qunit';
 
-moduleFor('helper:moment-duration', {
-  setup() {
+moduleForComponent('moment-duration', {
+  integration: true,
+  beforeEach() {
     moment.locale('en');
-    const registry =  this.registry || this.container;
-    registry.register('view:basic', Ember.View);
   }
 });
 
-const FAKE_HANDLEBARS_CONTEXT = {};
-
-test('one arg (ms)', (assert) => {
-  assert.expect(2);
-  assert.equal(callHelper(durationHelper, [86400000, FAKE_HANDLEBARS_CONTEXT]), 'a day');
-  assert.equal(callHelper(durationHelper, ['',  FAKE_HANDLEBARS_CONTEXT]), 'a few seconds');
-});
-
-test('one arg (object)', (assert) => {
+test('one arg (ms)', function(assert) {
   assert.expect(1);
 
-  const object = {
+  this.set('date', 86400000);
+  this.render(hbs`{{moment-duration date}}`);
+  assert.equal(this.$().text(), 'a day');
+});
+
+test('one arg (empty string)', function(assert) {
+  assert.expect(1);
+
+  this.set('date', '');
+  this.render(hbs`{{moment-duration date}}`);
+  assert.equal(this.$().text(), 'a few seconds');
+});
+
+test('one arg (object)', function(assert) {
+  assert.expect(1);
+
+  this.set('date', {
     seconds: 2,
     minutes: 2,
     hours: 2,
@@ -33,37 +36,61 @@ test('one arg (object)', (assert) => {
     weeks: 2,
     months: 2,
     years: 2
-  };
-  assert.equal(callHelper(durationHelper, [object,  FAKE_HANDLEBARS_CONTEXT]), '2 years');
+  });
+
+  this.render(hbs`{{moment-duration date}}`);
+  assert.equal(this.$().text(), '2 years');
 });
 
-test('one arg (string)', (assert) => {
+test('one arg (string)', function(assert) {
   assert.expect(1);
-  assert.equal(callHelper(durationHelper, ['23:59:59',  FAKE_HANDLEBARS_CONTEXT]), 'a day');
+
+  this.set('date', '23:59:59');
+  this.render(hbs`{{moment-duration date}}`);
+  assert.equal(this.$().text(), 'a day');
 });
 
-test('two args (value, units)', (assert) => {
-  assert.expect(2);
-  assert.equal(callHelper(durationHelper, [1, 'minutes', FAKE_HANDLEBARS_CONTEXT]), 'a minute');
-  assert.equal(callHelper(durationHelper, [24, 'hours',  FAKE_HANDLEBARS_CONTEXT]), 'a day');
-});
-
-test('can be called with null', (assert) => {
+test('two args (value, units) - minute', function(assert) {
   assert.expect(1);
-  assert.equal(callHelper(durationHelper, [null, 'minutes', FAKE_HANDLEBARS_CONTEXT]), 'a few seconds');
+
+  this.setProperties({
+    unit: 'minutes',
+    date: 1
+  });
+
+  this.render(hbs`{{moment-duration date unit}}`);
+
+  assert.equal(this.$().text(), 'a minute');
+});
+
+test('two args (value, units) - day', function(assert) {
+  assert.expect(1);
+
+  this.setProperties({
+    unit: 'day',
+    date: 1
+  });
+
+  this.render(hbs`{{moment-duration date unit}}`);
+  assert.equal(this.$().text(), 'a day');
+});
+
+test('two args (value, units) - empty value', function(assert) {
+  assert.expect(1);
+
+  this.setProperties({
+    unit: 'minutes',
+    date: null
+  });
+
+  this.render(hbs`{{moment-duration date unit}}`);
+  assert.equal(this.$().text(), 'a few seconds');
 });
 
 test('can inline a locale instead of using global locale', function(assert) {
   assert.expect(1);
 
-  const view = this.container.lookupFactory('view:basic').create({
-    template: hbs`{{moment-duration date locale='es'}}`,
-    context: {
-      date: 86400000
-    }
-  });
-
-  runAppend(view);
-  assert.equal(view.$().text(), 'un día'); // note: that's not an `i` in día
-  runDestroy(view);
+  this.set('date', 86400000);
+  this.render(hbs`{{moment-duration date locale='es'}}`);
+  assert.equal(this.$().text(), 'un día'); // note: that's not an `i` in día
 });

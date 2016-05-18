@@ -1,33 +1,14 @@
-import Ember from 'ember';
 import moment from 'moment';
-import computeFn from '../utils/compute-fn';
 
-const { later:runLater } = Ember.run;
+import computeFn from '../utils/helper-compute';
+import BaseHelper from './-base';
 
-export function helperFactory() {
-  if (Ember.Helper) {
-    return Ember.Helper.extend({
-      compute: computeFn(function(params, hash) {
-        if (hash.interval) {
-          runLater(this, this.recompute, parseInt(hash.interval, 10));
-        }
+export default BaseHelper.extend({
+  globalAllowEmpty: false,
 
-        let time = moment(...params);
-        if (hash.locale) {
-          time = time.locale(hash.locale);
-        }
-        return time.toNow(hash.hidePrefix);
-      })
-    });
-  }
+  compute: computeFn(function(params, { hidePrefix, locale, timeZone }) {
+    this._super(...arguments);
 
-  return computeFn(function(params, hash) {
-    let time = moment(...params);
-    if (hash.locale) {
-      time = time.locale(hash.locale);
-    }
-    return time.toNow(hash.hidePrefix);
-  });
-}
-
-export default helperFactory();
+    return this.morphMoment(moment(...params), { locale, timeZone }).toNow(hidePrefix);
+  })
+});

@@ -1,6 +1,7 @@
-import Ember from 'ember';
-import momentFormat from './format';
+import moment from 'moment';
 
-Ember.deprecate('ember-moment: `ember-moment/computeds/moment` is deprecated in favor of `ember-moment/computeds/format`');
+import computedFactory from './-base';
 
-export default momentFormat;
+export default computedFactory(function momentComputed(params) {
+  return moment(...params);
+});

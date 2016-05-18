@@ -1,129 +1,44 @@
-{{moment-format now}}
+Locale:
+<button {{action 'changeLocale' 'es'}}>ES</button>
+<button {{action 'changeLocale' 'fr'}}>FR</button>
+<button {{action 'changeLocale' 'en'}}>EN</button>
 
-<code>
-  \{{moment-format now}}
-</code>
+<hr>
+Default Format:
+<button {{action 'changeDefaultFormat' 'LLLL'}}>LLLL</button>
+<button {{action 'changeDefaultFormat' 'DD.MM.YYYY'}}>DD.MM.YYYY</button>
+<button {{action 'changeDefaultFormat' 'LL'}}>LL</button>
 
 <hr>
 
-{{moment-format now 'LLLL' }}
+<h3>Format</h3>
 
-<code>
-  \{{moment-format now 'LLLL'}}
-</code>
+{{partial 'partials/format'}}
 
 <hr>
 
-{{moment-format usIndependenceDay 'LLLL' }}
+<h3>From Now</h3>
 
-<code>
-  \{{moment-format usIndependenceDay 'LLLL'}}
-</code>
+{{partial 'partials/from-now'}}
 
-<hr>
+<h3>To Now</h3>
 
-{{moment-format usIndependenceDay 'MMM DD, YYYY' }}
-
-<code>
-  \{{moment-format usIndependenceDay 'MMM DD, YYYY'}}
-</code>
+{{partial 'partials/to-now'}}
 
 <hr>
 
-{{moment-format now 'LL' 'LLLL'}}
+<h3>Calendar</h3>
 
-<code>
-  \{{moment-format now 'LL' 'LLLL'}}
-</code>
+{{partial 'partials/calendar'}}
 
 <hr>
 
-{{moment-from-now now}}
+<h3>Duration</h3>
 
-<code>
-  \{{moment-from-now now}}
-</code>
+{{partial 'partials/duration'}}
 
 <hr>
 
-{{moment-from-now lastHour interval=1000}}
+<h3>Computed Property Macros</h3>
 
-<code>
-  \{{moment-from-now lastHour interval=1000}}
-</code>
-
-<hr>
-
-{{moment-from-now usIndependenceDay}}
-
-<code>
-  \{{moment-from-now usIndependenceDay}}
-</code>
-
-<hr>
-
-{{moment-duration 5000}}
-<code>
-  \{{moment-duration 5000}}
-</code>
-
-<hr>
-
-{{moment-duration 600000}}
-<code>
-  \{{moment-duration 600000}}
-</code>
-
-<hr>
-
-{{moment-duration 86400000}}
-<code>
-  \{{moment-duration 86400000}}
-</code>
-
-<hr>
-
-{{moment-duration '7.23:59:59'}}
-<code>
-  \{{moment-duration '7.23:59:59'}}
-</code>
-
-<hr>
-
-{{moment-duration 210 'days'}}
-<code>
-  \{{moment-duration 210 'days'}}
-</code>
-
-<hr>
-
-{{computedDate}}
-<br />
-<code>
-  export default Ember.Controller.extend({<br />
-    date: new Date(), /* in the route I am looping this */ <br />
-    computedDate: moment('date', 'MM/DD/YY hh:mm:ss')<br />
-  });
-</code>
-
-<hr>
-
-{{computedOneHourAgo}}
-<br />
-<code>
-  export default Ember.Controller.extend({<br />
-    lastHour: new Date(new Date().valueOf() - (60*60*1000)),<br />
-    computedOneHourAgo: ago('lastHour', 'MM/DD/YY hh:mm:ss')<br />
-  });
-</code>
-
-<hr>
-
-{{computedNumHours}}
-<br />
-<code>
-  export default Ember.Controller.extend({<br />
-    numHours: 822,<br />
-    computedNumHours: duration('numHours', 'hours'),<br />
-  });
-</code>
+{{partial 'partials/cps'}}

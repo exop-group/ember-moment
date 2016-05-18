@@ -1,17 +1,17 @@
 import moment from 'moment';
 
-function durationHelper(params, hash) {
-  if (params.length > 2) {
-    throw new TypeError('ember-moment: Invalid Number of arguments, at most 2');
+import BaseHelper from './-base';
+
+export default BaseHelper.extend({
+  disableInterval: true,
+
+  compute(params, { locale, timeZone }) {
+    this._super(...arguments);
+
+    if (!params || params && params.length > 2) {
+      throw new TypeError('ember-moment: Invalid Number of arguments, at most 2');
+    }
+
+    return this.morphMoment(moment.duration(...params), { locale, timeZone }).humanize();
   }
-
-  let time = moment.duration(...params);
-
-  if (hash.locale) {
-    time = time.locale(hash.locale);
-  }
-
-  return time.humanize();
-}
-
-export default durationHelper;
+});

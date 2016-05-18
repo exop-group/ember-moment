@@ -1,30 +1,92 @@
 import Ember from 'ember';
 import moment from 'moment';
-import momentFromNow from 'ember-moment/computeds/from-now';
+import getOwner from 'ember-getowner-polyfill';
+import { moduleFor, test } from 'ember-qunit';
+import fromNow from 'ember-moment/computeds/from-now';
+import momentComputed from 'ember-moment/computeds/moment';
 
-module('agoComputed', {
+moduleFor('ember-moment@computed:from-now', {
   setup() {
+    this.register('object:empty', Ember.Object.extend({}));
     moment.locale('en');
   }
 });
 
 function createSubject(attrs) {
-  return Ember.Object.extend(Ember.$.extend({
-    date: new Date(new Date().valueOf() - (60*60*1000)),
-    ago: momentFromNow('date')
-  }, attrs || {})).create();
+  return getOwner(this).resolveRegistration('object:empty').extend(Ember.$.extend(attrs, {
+    container: this.container,
+    registry: this.registry
+  })).create();
 }
 
-test('Formatter - get', (assert) => {
+test('get', function(assert) {
   assert.expect(1);
-  const subject = createSubject();
+  const subject = createSubject.call(this, {
+    date: moment().subtract(1, 'hour'),
+    ago: fromNow('date')
+  });
   assert.equal(subject.get('ago'), 'an hour ago');
 });
 
-test('Formatter - get #2', (assert) => {
+test('get and set', function(assert) {
   assert.expect(2);
-  const subject = createSubject();
+
+  const subject = createSubject.call(this, {
+    date: moment().subtract(1, 'hour'),
+    ago: fromNow('date')
+  });
+
   assert.equal(subject.get('ago'), 'an hour ago');
-  subject.set('date', new Date(new Date().valueOf() - (60*60*2000)));
+  subject.set('date', moment().subtract(2, 'hour'));
   assert.equal(subject.get('ago'), '2 hours ago');
+});
+
+test('get literal', function(assert) {
+  assert.expect(1);
+
+  const subject = createSubject.call(this, {
+    ago: fromNow(moment().subtract(1, 'hour'))
+  });
+
+  assert.equal(subject.get('ago'), 'an hour ago');
+});
+
+test('get literal without suffixx', function(assert) {
+  assert.expect(1);
+
+  const subject = createSubject.call(this, {
+    ago: fromNow(moment().subtract(1, 'hour'), 'LLLL', true)
+  });
+
+  assert.equal(subject.get('ago'), 'an hour');
+});
+
+test('get literal with suffix', function(assert) {
+  assert.expect(1);
+
+  const subject = createSubject.call(this, {
+    ago: fromNow(moment().subtract(1, 'hour'), 'LLLL', false)
+  });
+
+  assert.equal(subject.get('ago'), 'an hour ago');
+});
+
+test('composition with momentComputed get literal without suffix', function(assert) {
+  assert.expect(1);
+
+  const subject = createSubject.call(this, {
+    ago: fromNow(momentComputed(moment().subtract(1, 'hour'), 'LLLL'), true)
+  });
+
+  assert.equal(subject.get('ago'), 'an hour');
+});
+
+test('composition with momentComputed get literal with suffix', function(assert) {
+  assert.expect(1);
+
+  const subject = createSubject.call(this, {
+    ago: fromNow(momentComputed(moment().subtract(1, 'hour'), 'LLLL'), false)
+  });
+
+  assert.equal(subject.get('ago'), 'an hour ago');
 });

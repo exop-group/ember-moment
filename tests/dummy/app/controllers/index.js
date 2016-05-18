@@ -1,15 +1,28 @@
 import Ember from 'ember';
-import momentDuration from 'ember-moment/computeds/duration';
-import momentFormat from 'ember-moment/computeds/format';
-import momentFromNow from 'ember-moment/computeds/from-now';
+import duration from 'ember-moment/computeds/duration';
+import format from 'ember-moment/computeds/format';
+import fromNow from 'ember-moment/computeds/from-now';
+import locale from 'ember-moment/computeds/locale';
+import humanize from 'ember-moment/computeds/humanize';
+import momentComputed from 'ember-moment/computeds/moment';
 
 export default Ember.Controller.extend({
-  now: new Date(),
+  moment: Ember.inject.service(),
+  actions: {
+    changeLocale(locale) {
+      this.get('moment').changeLocale(locale);
+    },
+    changeDefaultFormat(defaultFormat) {
+      this.set('moment.defaultFormat', defaultFormat);
+    }
+  },
+  emptyDate: null,
+  currentTime: new Date(),
   lastHour: new Date(new Date().valueOf() - (60*60*1000)),
   date: new Date(),
   numHours: 822,
-  computedDate: momentFormat('date'),
-  computedOneHourAgo: momentFromNow('lastHour'),
-  computedNumHours: momentDuration('numHours', 'hours'),
+  computedDate: format(locale(momentComputed('date'), 'moment.locale')),
+  computedOneHourAgo: fromNow(locale(momentComputed('lastHour'), 'moment.locale')),
+  computedNumHours: humanize(locale(duration('numHours', 'hours'), 'moment.locale')),
   usIndependenceDay: new Date(1776, 6, 4, 12, 0, 0)
 });

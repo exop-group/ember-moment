@@ -1,16 +1,17 @@
-# Ember-moment
+# ember-moment
 [![npm Version][npm-badge]][npm]
 [![Build Status][travis-badge]][travis]
+[![Ember Observer Score](http://emberobserver.com/badges/ember-moment.svg)](http://emberobserver.com/addons/ember-moment)
+[![Ember badge][ember-badge]][embadge]
 
 [moment.js](http://momentjs.com) template helpers and computed property macros for Ember
 
 ## Requirements
-* Ember >= 1.10.0 (2.0-beta and canary also supported)
-  * If you need support for < Ember 1.10 please use ember-moment 1.x-2.x
+* Ember >= 1.13.0
+* Ember CLI
 
 ## Installing
 
-* ember-cli < 0.2.3 `ember install:addon ember-moment`
 * ember-cli >= 0.2.3 `ember install ember-moment`
 
 ## Upgrading
@@ -19,68 +20,42 @@ It's advisable to run `ember g ember-moment` between upgrades as dependencies ma
 
 ## Usage
 
-```hbs
-{{moment-format date}}
-{{moment-from-now date}}
-{{moment-to-now date}}
-{{moment-duration ms}}
-```
+## Computed Property Macros
 
-### Advance Usage
+Ships with the following computed property macros: `duration`, `humanize`, `locale`, `tz`, `format`, `calendar`, `moment`, `toNow`, `fromNow`.  They can be used individually or composed together.
 
-```hbs
-{{moment-format date outputFormat inputFormat}}
-{{moment-from-now date}}
-{{moment-to-now date}}
-{{moment-duration number units}}
-```
+[Computed Property Macro Documentation](https://github.com/stefanpenner/ember-moment/wiki/Computed-Property-Macros)
 
-Recomputes the time ago every 1-second.  This is useful for "live" updating as time elapses.
-
-*NOTE: This feature is only supported in Ember >= 1.13.0*
+## Helpers
 
 ```hbs
-{{moment-from-now date interval=1000}}
+{{moment-format date outputFormat inputFormat}} {{!-- outputFormat and inputFormat is optional --}}
+{{moment-from-now date hideSuffix=true}} {{!-- hideSuffix is optional --}}
+{{moment-to-now date hidePrefix=true}} {{!-- hidePrefix is optional --}}
+{{moment-duration number units}} {{!-- units is optional --}}
+{{moment-calendar date referenceDate}} {{!-- reference date is optional --}}
+{{is-before date comparison precision='year'}} {{!-- precision is optional --}}
+{{is-after date comparison precision='year'}} {{!-- precision is optional --}}
+{{is-same date comparison precision='year'}} {{!-- precision is optional --}}
+{{is-same-or-before date comparison precision='year'}} {{!-- precision is optional --}}
+{{is-same-or-after date comparison precision='year'}} {{!-- precision is optional --}}
+{{is-between date comparisonA comparisonB precision='year' inclusivity='[)'}} {{!-- precision is optional, inclusivity optional  --}}
 ```
+
+### Live Updating of Displayed Time
+
+```hbs
+{{moment-from-now date interval=1000}} // interval is in ms
+```
+
+Recomputes the time ago every 1-second (1000 milliseconds).  This is useful for "live" updating as time elapses.
 
 ## ES6 Moment
 
 This addon provides the ability to import moment as an ES6 module.
+
 ```js
 import moment from 'moment';
-```
-
-## Computed Macro
-
-```js
-import momentDuration from 'ember-moment/computeds/duration';
-import momentFormat from 'ember-moment/computeds/format';
-import momentFromNow from 'ember-moment/computeds/from-now';
-import momentToNow from 'ember-moment/computeds/to-now';
-
-export default Ember.Controller.extend({
-  date: new Date('2013-02-08T09:30:26'),
-
-  // Takes on the behavior of moment().format()
-  // http://momentjs.com/docs/#/displaying/format/
-  shortDate: momentFormat('date', 'MM/DD/YYYY'),
-
-  // first param: date input
-  // second param: date format http://momentjs.com/docs/#/parsing/string-format/ (optional)
-  // third param: hide suffix (optional, false by default)
-  // http://momentjs.com/docs/#/displaying/fromnow/
-  timeSince: momentFromNow("12-25-1995", "MM-DD-YYYY", false), // -> output: "2 years ago"
-
-  // first param: date input
-  // second param: date format http://momentjs.com/docs/#/parsing/string-format/ (optional)
-  // third param: hide prefix (optional, false by default)
-  // http://momentjs.com/docs/#/displaying/tonow
-  computedNumHours: momentToNow("12-25-1995", "MM-DD-YYYY", false), // -> output: "in 20 years"
-
-  // duration units: seconds, minutes, hours, days, weeks, months, years
-  // http://momentjs.com/docs/#/durations/
-  computedNumHours: momentDuration(10, 'hours')
-});
 ```
 
 ## Include Moment Timezone
@@ -88,7 +63,7 @@ export default Ember.Controller.extend({
 You can optionally include the Moment Timezone package in your `config/environment.js` like so:
 
 ```js
-// config.environment.js
+// config/environment.js
 module.exports = function() {
   return {
     moment: {
@@ -102,12 +77,14 @@ module.exports = function() {
 };
 ```
 
-## Global Default Format
+## Configuration Options
 
-Your application may require a different moment format default other than `LLLL`.  Your application may want dates to be treated in the shorthand date form `L` by default.
+### Global Default Output Format
+
+Your application may require a default format other than the default, ISO 8601.  For example, you may want dates to fallback on the localized shorthand format `L` by default.
 
 ```js
-// config.environment.js
+// config/environment.js
 module.exports = function() {
   return {
     moment: {
@@ -117,12 +94,40 @@ module.exports = function() {
 };
 ```
 
-## i18n support
-
-### Cherry pick locales (optimal)
+If you need to change the default format during runtime, use the service API.  During so, will trigger the moment-format helper instances to re-render with the new default format.
 
 ```js
-// config.environment.js
+// app/controller/index.js
+export default Ember.Controller.extend({
+  moment: Ember.inject.service(),
+  actions: {
+    changeDefaultFormat() {
+      this.set('moment.defaultFormat', 'MM.DD.YYYY');
+    }
+  }
+})
+```
+### Global Allow Empty Dates
+
+If `null`, `undefined`, or an empty string as a date to any of the moment helpers then you you will `Invalid Date` in the output.  To avoid this issue globally, you can set the option `allowEmpty` which all of the helpers respect and will result in nothing being rendered instead of `Invalid Date`.
+
+```js
+// config/environment.js
+module.exports = function() {
+  return {
+    moment: {
+      allowEmpty: true // default: false
+    }
+  }
+};
+```
+
+### i18n support
+
+#### Cherry pick locales (optimal)
+
+```js
+// config/environment.js
 module.exports = function(environment) {
   return {
     moment: {
@@ -133,10 +138,10 @@ module.exports = function(environment) {
   };
 ```
 
-### Include all locales into build
+#### Include all locales into build
 
 ```js
-// config.environment.js
+// config/environment.js
 module.exports = function(environment) {
   return {
     moment: {
@@ -145,34 +150,67 @@ module.exports = function(environment) {
   };
 ```
 
-### Configure default runtime locale
+#### Write all the locales to a folder relative to `dist`
 
-#### Globally
+Alternatively, you can copy all of moment's locale files into your `dist` directory.
+
+```js
+// config.environment.js
+module.exports = function(environment) {
+  return {
+    moment: {
+      // This will output _all_ locale scripts to assets/moment-locales
+      // this option does not respect includeLocales
+      localeOutputPath: 'assets/moment-locales'
+    }
+  };
+```
+
+This allows you to load them on demand when you need them:
+
+```js
+Ember.$.getScript('/assets/moment-locales/fr.js');
+```
+
+### Configure default runtime locale/timeZone
+
+#### Globally set locale
 
 ```js
 // app/routes/applicaton.js
-import moment from 'moment';
-
 export default Ember.Route.extend({
+  moment: Ember.inject.service(),
   beforeModel() {
-    // sets the application locale to Spanish
-    moment.locale('es');
+    this.get('moment').changeLocale('es');
   }
 });
 ```
 
-#### Locally
+#### Globally set time zone
 
-All helpers except a `locale` argument, which is a string.  This allows for overriding of the global locale.
-
-```hbs
-{{moment-format date locale='es'}}
-{{moment-duration date locale='es'}}
-{{moment-from-now date locale='es'}}
-{{moment-to-now date locale='es'}}
+```js
+// app/routes/applicaton.js
+export default Ember.Route.extend({
+  moment: Ember.inject.service(),
+  beforeModel() {
+    this.get('moment').changeTimeZone('America/Los_Angeles');
+  }
+});
 ```
 
-Feature set of i18n support within moment can be found here:  http://momentjs.com/docs/#/i18n/
+#### Inline Localization
+
+All helpers accept a `locale` and `timeZone` argument, which is a string.  This allows for overriding of the global locale.
+
+```hbs
+{{moment-format date locale='es' timeZone='America/Los_Angeles'}}
+{{moment-duration date locale='es' timeZone='America/Los_Angeles' timeZone='America/Los_Angeles'}}
+{{moment-from-now date locale='es' timeZone='America/Los_Angeles'}}
+{{moment-to-now date locale='es' timeZone='America/Los_Angeles'}}
+```
+
+Documentation on i18n support within moment can be found here:  http://momentjs.com/docs/#/i18n/
+Documentation on timezone within moment can be found here: http://momentjs.com/timezone/docs/
 
 ## Frequently Asked Questions
 
@@ -215,3 +253,5 @@ For more information on using ember-cli, visit [http://www.ember-cli.com/](http:
 [npm-badge]: https://img.shields.io/npm/v/ember-moment.svg?style=flat-square
 [travis]: https://travis-ci.org/stefanpenner/ember-moment
 [travis-badge]: https://img.shields.io/travis/stefanpenner/ember-moment.svg?branch=master&style=flat-square
+[embadge]: http://embadge.io/
+[ember-badge]: http://embadge.io/v1/badge.svg?start=1.13.0
